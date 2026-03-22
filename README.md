@@ -17,13 +17,13 @@ To run the script on your local system, simply launch the terminal and follow th
 ### - Prepare the environment (optional but recommended):
    It is always good practice to create and activate a virtual environment to keep your system dependencies clean.
    ```python
-   python -m venv venv
+   python3 -m venv .venv
    
    # On Linux/macOS:
-   source venv/bin/activate  
+   source .venv/bin/activate  
    
    # On Windows:
-   venv\Scripts\activate
+   .venv\Scripts\activate
    ```
 
 ### - Running the Script and Results

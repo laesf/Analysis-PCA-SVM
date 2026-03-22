@@ -33,4 +33,23 @@ To run the script on your local system, simply launch the terminal and follow th
 <img width="800" height="600" alt="pca" src="https://github.com/user-attachments/assets/95f1e553-5c77-491b-93f5-fe3029cdc35d" />
 
 
+### - SVM accuracy on PCA (pipeline): 0.5417
+
+| Class / Metric | Precision | Recall | F1-score | Support |
+| :--- | :--- | :--- | :--- | :--- |
+| **0** | 0.70 | 0.53 | 0.60 | 36 |
+| **1** | 0.43 | 0.69 | 0.53 | 36 |
+| **2** | 0.69 | 0.69 | 0.69 | 35 |
+| **3** | 0.50 | 0.32 | 0.39 | 37 |
+| **4** | 0.84 | 0.89 | 0.86 | 36 |
+| **5** | 0.28 | 0.19 | 0.23 | 37 |
+| **6** | 0.67 | 0.81 | 0.73 | 36 |
+| **7** | 0.71 | 0.67 | 0.69 | 36 |
+| **8** | 0.26 | 0.26 | 0.26 | 35 |
+| **9** | 0.34 | 0.39 | 0.36 | 36 |
+| | | | | |
+| **accuracy** | | | 0.54 | 360 |
+| **macro avg** | 0.54 | 0.54 | 0.53 | 360 |
+| **weighted avg** | 0.54 | 0.54 | 0.53 | 360 |
+
 

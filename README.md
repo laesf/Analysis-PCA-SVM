@@ -1,55 +1,78 @@
-### 1. Analysis and Classification of the “Digits” Dataset with PCA and SVM
+# PCA and SVM on the Digits Dataset
 
-This Python script performs a complete machine learning pipeline for exploratory analysis and classification of the well-known handwritten digit recognition dataset (“Digits”). The code integrates dimensional reduction techniques (PCA) with powerful classification algorithms (SVM).
+How much can the scikit-learn Digits images be compressed with PCA before an SVM classifier loses accuracy? This project explores the dataset with PCA, selects the number of components by cross-validation, and evaluates the result on a held-out test set.
 
-### 2. Project Overview
+## Dataset
 
-The code is designed to load the digit data, explore the information variance, visualize relationships between classes in a two-dimensional space, and finally train a Support Vector Machine to classify images based on the extracted features.
+[Digits](https://scikit-learn.org/stable/datasets/toy_dataset.html#digits-dataset) ships with scikit-learn: 1,797 grayscale images of handwritten digits (0–9), each 8×8 pixels, giving 64 features with values from 0 to 16. There are no missing values. The data is split once into a stratified 80% training set (1,437 images) and 20% test set (360 images) with a fixed random seed.
 
-### 3. Requirements and Dependencies
+## Method
 
-To run the script correctly and ensure proper execution, you must configure and install the Python packages listed in the “Dependencies and Requirements” section below.
+1. **Preprocessing.** Every model is a scikit-learn `Pipeline`: `StandardScaler` → `PCA` (optional) → `SVC` with an RBF kernel (`C=1.0`, `gamma="scale"`). Scaling and PCA are fitted inside the pipeline, so cross-validation folds and the test set never leak into them.
+2. **Exploration.** Explained variance and a 2-D projection are computed on the standardized training set, i.e. the data the classifier sees.
+3. **Model selection.** 5-fold stratified cross-validation on the training set compares 2, 5, 10, 15, 20, 30, 40, 50 and 60 components, plus an SVM without PCA as a baseline. The number of components with the highest mean CV accuracy is selected.
+4. **Final evaluation.** The selected model and the 2-component model are fitted on the full training set and evaluated once on the test set. The test set plays no part in any choice.
 
-### 4. Installation and Execution
+## Results
 
-To run the script on your local system, simply launch the terminal and follow these steps:
+Cross-validation accuracy on the training set:
 
-### - Prepare the environment (optional but recommended):
-   It is always good practice to create and activate a virtual environment to keep your system dependencies clean.
-   ```python
-   python3 -m venv .venv
-   
-   # On Linux/macOS:
-   source .venv/bin/activate  
-   
-   # On Windows:
-   .venv\Scripts\activate
-   ```
+| Components | CV accuracy |
+| ---: | :--- |
+| 2 | 0.585 ± 0.023 |
+| 5 | 0.874 ± 0.038 |
+| 10 | 0.942 ± 0.025 |
+| 15 | 0.968 ± 0.011 |
+| 20 | 0.975 ± 0.011 |
+| 30 | 0.981 ± 0.006 |
+| 40 | 0.982 ± 0.009 |
+| **50** | **0.983 ± 0.006** |
+| 60 | 0.981 ± 0.006 |
+| no PCA | 0.981 ± 0.006 |
 
-### - Running the Script and Results
+Test set accuracy:
 
-<img width="800" height="500" alt="plot_pca" src="https://github.com/user-attachments/assets/b1349915-0027-4050-98d5-8d82c91603f1" />
+| Model | Test accuracy |
+| :--- | ---: |
+| PCA, 50 components (selected) | 0.975 |
+| PCA, 2 components | 0.542 |
 
-<img width="800" height="600" alt="pca" src="https://github.com/user-attachments/assets/95f1e553-5c77-491b-93f5-fe3029cdc35d" />
+![Cross-validation accuracy by number of components](figures/cv_accuracy.png)
 
+Two components keep about 22% of the variance. Some digits already form recognisable groups (4 and 6 in particular), but most overlap, which is why the 2-component model reaches only 54%. Accuracy rises steeply up to about 15–20 components and then levels off: from 30 components on, the differences are smaller than the spread across folds, and PCA neither helps nor hurts compared with the SVM on all 64 features. Ninety-five percent of the variance is reached with 40 components.
 
-### - SVM accuracy on PCA (pipeline): 0.5417
+| | |
+| :---: | :---: |
+| ![Cumulative explained variance](figures/explained_variance.png) | ![Training set on the first two components](figures/pca_projection.png) |
 
-| Class / Metric | Precision | Recall | F1-score | Support |
-| :--- | :--- | :--- | :--- | :--- |
-| **0** | 0.70 | 0.53 | 0.60 | 36 |
-| **1** | 0.43 | 0.69 | 0.53 | 36 |
-| **2** | 0.69 | 0.69 | 0.69 | 35 |
-| **3** | 0.50 | 0.32 | 0.39 | 37 |
-| **4** | 0.84 | 0.89 | 0.86 | 36 |
-| **5** | 0.28 | 0.19 | 0.23 | 37 |
-| **6** | 0.67 | 0.81 | 0.73 | 36 |
-| **7** | 0.71 | 0.67 | 0.69 | 36 |
-| **8** | 0.26 | 0.26 | 0.26 | 35 |
-| **9** | 0.34 | 0.39 | 0.36 | 36 |
-| | | | | |
-| **accuracy** | | | 0.54 | 360 |
-| **macro avg** | 0.54 | 0.54 | 0.53 | 360 |
-| **weighted avg** | 0.54 | 0.54 | 0.53 | 360 |
+On the test set the selected model misclassifies 9 of 360 images; the most frequent confusions are 8 → 1 and 9 → 7.
 
+![Confusion matrix on the test set](figures/confusion_matrix.png)
 
+## Running
+
+Requires Python 3.11 or later (the minimum for current scikit-learn releases).
+
+```bash
+git clone https://github.com/laesf/Analysis-PCA-SVM.git
+cd Analysis-PCA-SVM
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python analysis.py
+```
+
+The script prints the cross-validation table, the selected number of components, the test results and a classification report, and writes the four figures to `figures/`. It takes a few seconds. Results are deterministic for a given library version; the numbers above were produced with Python 3.14, scikit-learn 1.9.1, NumPy 2.5.5 and Matplotlib 3.11.2.
+
+Tests:
+
+```bash
+python -m unittest
+```
+
+## Limitations
+
+- SVM hyperparameters are fixed at scikit-learn's defaults; only the number of PCA components is tuned.
+- The selection picks the highest mean CV accuracy. Above 30 components the candidates are within one standard deviation of each other, so a smaller model would be an equally defensible choice.
+- Results come from a single train/test split of a small, clean dataset.
+- The test set was not used to select the model, but its score was seen during development: an earlier run with a grid ending at 40 components printed a test accuracy of 0.978. The grid was then extended to 60 because the best CV score sat at the edge of the grid, not because of the test result.
